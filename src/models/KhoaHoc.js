@@ -54,6 +54,13 @@ const khoaHocSchema = new mongoose.Schema(
       type: [baiHocSchema], // mảng video bài học
       default: [],
     },
+    tags: {
+      type: [String], // Mảng các chuỗi
+      default: [],    // Mặc định là mảng rỗng
+      index: true     // Đánh index để tìm kiếm theo tag nhanh hơn
+    },
+    isTrangThaiMua: { type: Boolean, default: false },
+    isHienThi: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
