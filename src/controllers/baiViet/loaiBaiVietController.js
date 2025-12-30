@@ -50,7 +50,7 @@ exports.getAllLoaiBaiViet = async (req, res) => {
 /* ================= GET BY ID ================= */
 exports.getLoaiBaiVietById = async (req, res) => {
   try {
-    const loai = await LoaiBaiViet.findById(req.params.id);
+    const loai = await LoaiBaiViet.findOne({maLoaiBV:req.params.id});
     if (!loai) {
       return res.status(404).json({ message: "Không tìm thấy loại bài viết" });
     }

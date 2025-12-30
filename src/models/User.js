@@ -1,7 +1,16 @@
 const mongoose = require("mongoose");
-
+const crypto = require("crypto"); // Thư viện có sẵn của NodeJS
 const userSchema = new mongoose.Schema(
   {
+    maNguoiDung: {
+      type: String,
+      unique: true, // Đảm bảo mã không trùng lặp giữa các user
+      uppercase: true, // Tự động chuyển thành chữ hoa
+      default: () => {
+        // Sinh 6 ký tự ngẫu nhiên (chữ và số)
+        return crypto.randomBytes(3).toString("hex").toUpperCase();
+      }
+    },
     hoTen: {
       type: String,
       required: true,

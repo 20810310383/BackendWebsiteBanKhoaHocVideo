@@ -5,8 +5,8 @@ const adminMiddleware = require("../middlewares/adminMiddleware");
 const router = express.Router();
 
 router.post("/", protect, adminMiddleware, createLoaiBaiViet);
-router.get("/", protect, adminMiddleware, getAllLoaiBaiViet);
-router.get("/:id", protect, adminMiddleware, getLoaiBaiVietById);
+router.get("/", getAllLoaiBaiViet);
+router.get("/:id", getLoaiBaiVietById);
 router.put("/:id", protect, adminMiddleware, updateLoaiBaiViet);
 router.delete("/:id", protect, adminMiddleware, deleteLoaiBaiViet);
 

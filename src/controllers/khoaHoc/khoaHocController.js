@@ -28,9 +28,16 @@ exports.getAllKhoaHoc = async (req, res) => {
       isHienThi,
       giaTu,
       giaDen,
+      sort
     } = req.query;
 
     const filter = {};
+
+    // Xử lý logic sắp xếp
+    let sortQuery = { createdAt: -1 }; // Mặc định mới nhất
+    if (sort === "price_asc") sortQuery = { gia: 1 };
+    if (sort === "price_desc") sortQuery = { gia: -1 };
+    if (sort === "newest") sortQuery = { createdAt: -1 };
 
     /* ===== SEARCH THEO TIÊU ĐỀ ===== */
     if (tieuDe) {
@@ -59,7 +66,7 @@ exports.getAllKhoaHoc = async (req, res) => {
     const [data, total] = await Promise.all([
       KhoaHoc.find(filter)
         .populate("danhMuc", "ten")
-        .sort({ createdAt: -1 })
+        .sort(sortQuery)
         .skip(skip)
         .limit(Number(limit)),
       KhoaHoc.countDocuments(filter),
@@ -83,10 +90,7 @@ exports.getAllKhoaHoc = async (req, res) => {
 /* ================= GET BY ID ================= */
 exports.getKhoaHocById = async (req, res) => {
   try {
-    const khoaHoc = await KhoaHoc.findById(req.params.id).populate(
-      "danhMuc",
-      "ten"
-    );
+    const khoaHoc = await KhoaHoc.findOne({maKhoaHoc: req.params.id}).populate("danhMuc");
 
     if (!khoaHoc) {
       return res.status(404).json({ message: "Không tìm thấy khóa học" });

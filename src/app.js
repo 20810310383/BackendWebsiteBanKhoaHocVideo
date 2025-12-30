@@ -18,6 +18,7 @@ const userRoute = require("./routes/userRoute");
 const danhMucRoute = require("./routes/danhMucRoute");
 const khoaHocRoute = require("./routes/khoaHocRoute");
 const aiRouter = require("./routes/aiRouter");
+const maKhuyenMaiRoute = require("./routes/maKhuyenMaiRoute");
 // ==========================================
 
 require("dotenv").config();
@@ -73,6 +74,7 @@ const routes = [
   { path: '/api/khoahoc', router: khoaHocRoute },
   { path: '/api/danhmuc', router: danhMucRoute },
   { path: '/api/ai', router: aiRouter },
+  { path: '/api/ma-khuyen-mai', router: maKhuyenMaiRoute },
 ];
 
 routes.forEach((r) => app.use(r.path, r.router));

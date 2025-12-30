@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const crypto = require("crypto"); 
 const baiHocSchema = new mongoose.Schema(
   {
     tieuDe: {
@@ -19,6 +19,15 @@ const baiHocSchema = new mongoose.Schema(
 
 const khoaHocSchema = new mongoose.Schema(
   {
+    maKhoaHoc: {  
+      type: String,
+      unique: true, // Đảm bảo mã không trùng lặp giữa các user
+      uppercase: true, // Tự động chuyển thành chữ hoa
+      default: () => {
+        // Sinh 6 ký tự ngẫu nhiên (chữ và số)
+        return crypto.randomBytes(3).toString("hex").toUpperCase();
+      }
+    },
     tieuDe: {
       type: String,
       required: true,

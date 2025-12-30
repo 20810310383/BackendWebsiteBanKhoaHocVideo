@@ -5,8 +5,8 @@ const { createDanhMuc, getAllDanhMuc, getDanhMucById, updateDanhMuc, deleteDanhM
 const router = express.Router();
 
 router.post("/", protect, adminMiddleware, createDanhMuc);
-router.get("/", protect, adminMiddleware, getAllDanhMuc);
-router.get("/:id", protect, adminMiddleware, getDanhMucById);
+router.get("/", getAllDanhMuc);
+router.get("/:id", getDanhMucById);
 router.put("/:id", protect, adminMiddleware, updateDanhMuc);
 router.delete("/:id", protect, adminMiddleware, deleteDanhMuc);
 

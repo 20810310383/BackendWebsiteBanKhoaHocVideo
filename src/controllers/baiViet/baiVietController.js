@@ -43,7 +43,7 @@ exports.getAllBaiViet = async (req, res) => {
 
     const [data, total] = await Promise.all([
       BaiViet.find(filter)
-        .populate("loaiBaiViet", "ten")
+        .populate("loaiBaiViet", "ten maLoaiBV")
         .populate("tacGia", "hoTen avatar")
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -68,13 +68,13 @@ exports.getAllBaiViet = async (req, res) => {
 /* ================= GET BY ID ================= */
 exports.getBaiVietById = async (req, res) => {
   try {
-    const baiViet = await BaiViet.findById(req.params.id)
-      .populate("loaiBaiViet", "ten")
+    const baiViet = await BaiViet.findOne({maBV: req.params.id})
+      .populate("loaiBaiViet", "ten maLoaiBV")
       .populate("tacGia", "hoTen avatar");
 
     if (!baiViet) {
       return res.status(404).json({ message: "Không tìm thấy bài viết" });
-    }
+    } 
 
     res.json(baiViet);
   } catch (error) {

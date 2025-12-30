@@ -5,8 +5,8 @@ const adminMiddleware = require("../middlewares/adminMiddleware");
 const { createBaiViet, getAllBaiViet, getBaiVietById, updateBaiViet, deleteBaiViet } = require("../controllers/baiViet/baiVietController");
 
 router.post("/", protect, adminMiddleware, createBaiViet);
-router.get("/", protect, adminMiddleware, getAllBaiViet);
-router.get("/:id", protect, adminMiddleware, getBaiVietById);
+router.get("/",  getAllBaiViet);
+router.get("/:id", getBaiVietById);
 router.put("/:id", protect, adminMiddleware, updateBaiViet);
 router.delete("/:id", protect, adminMiddleware, deleteBaiViet);
 
