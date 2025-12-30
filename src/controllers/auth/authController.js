@@ -172,7 +172,7 @@ exports.doiMatKhau = async (req, res) => {
       return res
         .status(400)
         .json({ success: false, message: "Thiếu mật khẩu cũ hoặc mới" });
-s
+
     const user = await User.findById(req.user._id)
     if (!user)
       return res.status(404).json({ success: false, message: "Không tìm thấy người dùng" });

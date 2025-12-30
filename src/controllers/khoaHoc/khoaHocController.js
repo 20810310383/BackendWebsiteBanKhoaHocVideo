@@ -65,7 +65,7 @@ exports.getAllKhoaHoc = async (req, res) => {
 
     const [data, total] = await Promise.all([
       KhoaHoc.find(filter)
-        .populate("danhMuc", "ten")
+        .populate("danhMuc")
         .sort(sortQuery)
         .skip(skip)
         .limit(Number(limit)),
