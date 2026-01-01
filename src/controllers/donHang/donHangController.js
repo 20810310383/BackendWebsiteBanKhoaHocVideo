@@ -194,3 +194,36 @@ exports.deleteDonHang = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi xóa đơn hàng", error: error.message });
   }
 };
+
+// ✅ Admin cập nhật lại nội dung bài học cho một đơn hàng cụ thể từ khóa học gốc
+exports.syncCourseSnapshot = async (req, res) => {
+  try {
+    const { idDonHang } = req.params;
+
+    // 1. Tìm đơn hàng
+    const donHang = await DonHang.findById(idDonHang);
+    if (!donHang) {
+      return res.status(404).json({ success: false, message: "Không tìm thấy đơn hàng" });
+    }
+
+    // 2. Tìm khóa học gốc dựa trên khoaHocGocId đã lưu trong đơn hàng
+    const khoaHocGoc = await KhoaHoc.findById(donHang.khoaHocGocId);
+    if (!khoaHocGoc) {
+      return res.status(404).json({ success: false, message: "Khóa học gốc đã bị xóa, không thể đồng bộ" });
+    }
+
+    // 3. Cập nhật bài học mới vào snapshot của đơn hàng
+    donHang.thongTinKhoaHoc.baiHoc = khoaHocGoc.baiHoc;
+    donHang.thongTinKhoaHoc.tieuDe = khoaHocGoc.tieuDe; // Cập nhật cả tiêu đề nếu cần
+    
+    await donHang.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Đã cập nhật nội dung bài học mới nhất cho khách hàng",
+      data: donHang.thongTinKhoaHoc.baiHoc
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Lỗi đồng bộ dữ liệu", error: error.message });
+  }
+};
