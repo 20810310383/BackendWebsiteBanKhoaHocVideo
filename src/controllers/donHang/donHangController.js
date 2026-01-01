@@ -123,16 +123,37 @@ exports.getAllDonHang = async (req, res) => {
   try {
     const { page = 1, limit = 10, search = "" } = req.query;
 
-    // Tìm kiếm theo tên người dùng hoặc tiêu đề khóa học trong snapshot
-    const query = search ? {
-      $or: [
-        { "thongTinKhoaHoc.tieuDe": { $regex: search, $options: "i" } },
-        { "maKhuyenMai": { $regex: search, $options: "i" } }
-      ]
-    } : {};
+    let query = {};
+
+    if (search) {
+      // 1. Tìm các User có tên hoặc email khớp với từ khóa
+      const users = await User.find({
+        $or: [
+          { hoTen: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } },
+          { soDienThoai: { $regex: search, $options: "i" } }
+        ]
+      }).select("_id");
+
+      const userIds = users.map(u => u._id);
+
+      // 2. Xây dựng query cho DonHang
+      query = {
+        $or: [
+          { "thongTinKhoaHoc.tieuDe": { $regex: search, $options: "i" } }, // Tìm theo tên khóa học
+          { "maKhuyenMai": { $regex: search, $options: "i" } },           // Tìm theo mã giảm giá
+          { nguoiDung: { $in: userIds } }                               // Tìm theo danh sách User tìm được
+        ]
+      };
+
+      // 3. Nếu search là một ID hợp lệ của MongoDB, tìm theo ID đơn hàng luôn
+      if (search.match(/^[0-9a-fA-F]{24}$/)) {
+        query.$or.push({ _id: search });
+      }
+    }
 
     const orders = await DonHang.find(query)
-      .populate("nguoiDung", "hoTen email maNguoiDung") // Lấy thông tin user liên quan
+      .populate("nguoiDung", "hoTen email maNguoiDung soDienThoai avatar")
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
