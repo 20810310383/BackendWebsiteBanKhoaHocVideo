@@ -116,6 +116,7 @@ exports.loginTK = async (req, res) => {
       message: "Đăng nhập thành công",
       user: {
         id: user._id,
+        maNguoiDung: user.maNguoiDung,
         email: user.email,
         soDienThoai: user.soDienThoai,
         hoTen: user.hoTen,
