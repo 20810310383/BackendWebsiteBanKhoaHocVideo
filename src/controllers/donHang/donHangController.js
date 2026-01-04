@@ -2,7 +2,7 @@ const DonHang = require("../../models/DonHang");
 const KhoaHoc = require("../../models/KhoaHoc");
 const MaKhuyenMai = require("../../models/MaKhuyenMai");
 const User = require("../../models/User");
-
+const CryptoJS = require("crypto-js");
 exports.thanhToanKhoaHoc = async (req, res) => {
   try {
     const { idKhoaHoc, tenma } = req.body;
@@ -85,7 +85,7 @@ exports.thanhToanKhoaHoc = async (req, res) => {
 };
 
 // API lấy danh sách khóa học đã mua của User
-exports.getKhoaHocDaMua = async (req, res) => {
+exports.getKhoaHocDaMua1 = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 6; // Mỗi trang 6 khóa học cho đẹp giao diện
@@ -118,6 +118,50 @@ exports.getKhoaHocDaMua = async (req, res) => {
     res.status(500).json({ message: "Lỗi lấy danh sách khóa học" });
   }
 };
+// ✅ Lấy danh sách khóa học đã mua của User (Dữ liệu đã được mã hóa)
+exports.getKhoaHocDaMua = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 6;
+    const skip = (page - 1) * limit;
+
+    const total = await DonHang.countDocuments({ 
+      nguoiDung: req.user._id, 
+      trangThai: true 
+    });
+
+    const orders = await DonHang.find({ 
+      nguoiDung: req.user._id, 
+      trangThai: true 
+    })
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .lean(); // Dùng lean để lấy object JS thuần
+
+    // --- BƯỚC FAKE DỮ LIỆU: MÃ HÓA ---
+    // Chuyển object thành chuỗi JSON
+    const ciphertext = CryptoJS.AES.encrypt(
+      JSON.stringify(orders), 
+      process.env.SECRET_KEY_CUA_BAN // Đặt key này trong file .env
+    ).toString();
+
+    res.status(200).json({
+      success: true,
+      // Thay vì trả về data: orders, ta trả về payload đã mã hóa
+      payload: ciphertext, 
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi lấy danh sách khóa học" });
+  }
+};
+
 // ✅ Lấy tất cả đơn hàng (Dành cho Admin)
 exports.getAllDonHang = async (req, res) => {
   try {
