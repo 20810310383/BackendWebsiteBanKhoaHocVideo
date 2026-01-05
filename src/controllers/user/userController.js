@@ -1,4 +1,5 @@
 const User = require("../../models/User");
+const WalletTransaction = require("../../models/WalletTransaction");
 
 /* ================= GET ALL USERS (ADMIN) ================= */
 exports.getAllUsers = async (req, res) => {
@@ -133,6 +134,9 @@ exports.updateSoDu = async (req, res) => {
     if (!user)
       return res.status(404).json({ message: "Không tìm thấy người dùng" });
 
+    const soDuTruoc = user.soDu;
+    let noiDungGiaoDich = (type === "add" ? "Admin cộng tiền thủ công" : "Admin trừ tiền thủ công");
+
     if (type === "add") {
       user.soDu += amount;
     } else if (type === "sub") {
@@ -143,7 +147,25 @@ exports.updateSoDu = async (req, res) => {
       return res.status(400).json({ message: "Type không hợp lệ" });
     }
 
-    await user.save();
+    const soDuSau = user.soDu;
+
+    // 1. LƯU LỊCH SỬ BIẾN ĐỘNG SỐ DƯ (Cho User xem)
+    const transactionLog = new WalletTransaction({
+      nguoiDung: user._id,
+      loaiGiaoDich: type === "add" ? "NAP_TIEN_THU_CONG" : "TRU_TIEN_THU_CONG", // Hoặc tạo thêm loại "DIEU_CHINH_AD"
+      soTien: type === "add" ? amount : -amount,
+      soDuTruoc: soDuTruoc,
+      soDuSau: soDuSau,
+      noiDung: noiDungGiaoDich,
+      maThamChieu: `AD_MANUAL_${Date.now()}`, // Đánh dấu đây là giao dịch thủ công
+    });
+
+    // await user.save();
+
+    await Promise.all([
+      user.save(),
+      transactionLog.save()
+    ]);
 
     res.json({
       message: "Cập nhật số dư thành công",

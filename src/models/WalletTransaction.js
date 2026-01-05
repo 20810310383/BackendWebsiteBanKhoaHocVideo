@@ -10,7 +10,7 @@ const walletTransactionSchema = new mongoose.Schema(
     },
     loaiGiaoDich: {
       type: String,
-      enum: ["NAP_TIEN", "MUA_KHOA_HOC"], // Phân loại giao dịch
+      enum: ["NAP_TIEN", "MUA_KHOA_HOC", "NAP_TIEN_THU_CONG", "TRU_TIEN_THU_CONG"], // Phân loại giao dịch
       required: true,
     },
     soTien: {
@@ -31,7 +31,7 @@ const walletTransactionSchema = new mongoose.Schema(
     },
     trangThai: {
       type: String,
-      enum: ["THANH_CONG", "THAT_BAI"],
+      enum: ["THANH_CONG", "THAT_BAI"], 
       default: "THANH_CONG",
     },
     maThamChieu: {
@@ -39,6 +39,6 @@ const walletTransactionSchema = new mongoose.Schema(
     }
   },
   { timestamps: true }
-);
+);  
 
 module.exports = mongoose.model("WalletTransaction", walletTransactionSchema);
