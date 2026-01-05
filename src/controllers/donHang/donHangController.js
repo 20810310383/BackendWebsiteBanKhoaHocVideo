@@ -3,6 +3,7 @@ const KhoaHoc = require("../../models/KhoaHoc");
 const MaKhuyenMai = require("../../models/MaKhuyenMai");
 const User = require("../../models/User");
 const CryptoJS = require("crypto-js");
+const WalletTransaction = require("../../models/WalletTransaction");
 exports.thanhToanKhoaHoc = async (req, res) => {
   try {
     const { idKhoaHoc, tenma } = req.body;
@@ -13,12 +14,6 @@ exports.thanhToanKhoaHoc = async (req, res) => {
     if (!khoaHoc) {
       return res.status(404).json({ message: "Khóa học không tồn tại." });
     }
-
-    // 2. Kiểm tra xem user đã mua khóa học này chưa
-    // const daMua = await DonHang.findOne({ nguoiDung: userId, khoaHocGocId: idKhoaHoc, trangThai: true });
-    // if (daMua) {
-    //   return res.status(400).json({ message: " bạn đã sở hữu khóa học này rồi." });
-    // }
 
     // 3. Tính toán giá tiền
     const giaHeThong = khoaHoc.gia * (1 - khoaHoc.giamGia / 100);
@@ -49,9 +44,26 @@ exports.thanhToanKhoaHoc = async (req, res) => {
       return res.status(400).json({ message: "Số dư không đủ. Vui lòng nạp thêm tiền." });
     }
 
+    // Ghi lại số dư trước khi trừ
+    const soDuTruoc = user.soDu;
+
     // 6. THỰC HIỆN GIAO DỊCH (Trừ tiền và tạo đơn)
     user.soDu -= tongTienThanhToan;
     await user.save();
+
+    const soDuSau = user.soDu;
+
+    // 7. LƯU LỊCH SỬ VÍ (TRỪ TIỀN)
+    const transactionLog = new WalletTransaction({
+      nguoiDung: userId,
+      loaiGiaoDich: "MUA_KHOA_HOC",
+      soTien: -tongTienThanhToan, // Để dấu âm cho dễ phân biệt trừ tiền
+      soDuTruoc: soDuTruoc,
+      soDuSau: soDuSau,
+      noiDung: `Trừ tiền mua khóa học: ${khoaHoc.tieuDe}`,
+      maThamChieu: khoaHoc.maKhoaHoc,
+    });
+    await transactionLog.save();
 
     const moiDonHang = new DonHang({
       nguoiDung: userId,
