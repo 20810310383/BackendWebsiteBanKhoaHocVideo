@@ -1,4 +1,27 @@
 const KhoaHoc = require("../../models/KhoaHoc");
+const CryptoJS = require("crypto-js");
+require("dotenv").config();
+
+const SECRET_KEY = process.env.SECRET_KEY_CUA_BAN
+
+// Hàm hỗ trợ mã hóa
+const encryptPayload = (data) => {
+    try {
+        // 1. Kiểm tra key trước khi mã hóa
+        if (!SECRET_KEY) {
+            throw new Error("SECRET_KEY is undefined. Check your .env file.");
+        }
+
+        // 2. Chuyển đổi data sang JSON string
+        const dataToEncrypt = data ? JSON.stringify(data) : JSON.stringify({});
+        
+        // 3. Thực hiện mã hóa
+        return CryptoJS.AES.encrypt(dataToEncrypt, SECRET_KEY).toString();
+    } catch (error) {
+        console.error("Lỗi mã hóa tại Server:", error.message);
+        return ""; // Trả về chuỗi rỗng để tránh crash server
+    }
+};
 
 /* ================= CREATE (ADMIN) ================= */
 exports.createKhoaHoc = async (req, res) => {
@@ -63,24 +86,47 @@ exports.getAllKhoaHoc = async (req, res) => {
 
     const skip = (page - 1) * limit;
 
-    const [data, total] = await Promise.all([
-      KhoaHoc.find(filter)
-        .populate("danhMuc")
-        .sort(sortQuery)
-        .skip(skip)
-        .limit(Number(limit)),
-      KhoaHoc.countDocuments(filter),
+    const [courses, total] = await Promise.all([
+        KhoaHoc.find(filter)
+            .populate("danhMuc")
+            .sort(sortQuery)
+            .skip(skip)
+            .limit(Number(limit)),
+        KhoaHoc.countDocuments(filter),
     ]);
 
-    res.json({
-      data,
-      pagination: {
-        total,
-        page: Number(page),
-        limit: Number(limit),
-        totalPages: Math.ceil(total / limit),
-      },
-    });
+    const responseData = {
+        data: courses,
+        pagination: {
+            total,
+            page: Number(page),
+            limit: Number(limit),
+            totalPages: Math.ceil(total / limit),
+        },
+    };
+
+    // Trả về payload mã hóa
+    res.json({ payload: encryptPayload(responseData) });
+
+    // const [data, total] = await Promise.all([
+    //   KhoaHoc.find(filter)
+    //     .populate("danhMuc")
+    //     .select("-baiHoc")
+    //     .sort(sortQuery)
+    //     .skip(skip)
+    //     .limit(Number(limit)),
+    //   KhoaHoc.countDocuments(filter),
+    // ]);
+
+    // res.json({
+    //   data,
+    //   pagination: {
+    //     total,
+    //     page: Number(page),
+    //     limit: Number(limit),
+    //     totalPages: Math.ceil(total / limit),
+    //   },
+    // });
   } catch (err) {
     console.error("getAllKhoaHoc:", err);
     res.status(500).json({ message: "Lỗi server" });
@@ -96,7 +142,17 @@ exports.getKhoaHocById = async (req, res) => {
       return res.status(404).json({ message: "Không tìm thấy khóa học" });
     }
 
-    res.json(khoaHoc);
+    // Ẩn link video trong chi tiết (Chỉ hiện tiêu đề để xem thử hoặc Sidebar)
+    if (khoaHoc.baiHoc) {
+        khoaHoc.baiHoc = khoaHoc.baiHoc.map(lesson => ({
+            _id: lesson._id,
+            tieuDe: lesson.tieuDe,
+            // video: lesson.video -> KHÔNG TRẢ VỀ URL Ở ĐÂY
+        }));
+    }
+
+    res.json({ payload: encryptPayload(khoaHoc) });
+    // res.json(khoaHoc);
   } catch (err) {
     res.status(400).json({ message: "ID không hợp lệ" });
   }
