@@ -34,6 +34,7 @@ connectDB();
 const allowedOrigins = [
   "http://localhost:3172",
   "https://chiconginverter.com",
+  "https://www.chiconginverter.com",
   "https://giao-dien-website-ban-khoa-hoc-vide.vercel.app"
 ];
 
