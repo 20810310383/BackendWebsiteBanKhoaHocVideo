@@ -31,7 +31,11 @@ const app = express();
 connectDB();
 
 // ================= CORS =================
-const allowedOrigins = ["http://localhost:3172"];
+const allowedOrigins = [
+  "http://localhost:3172",
+  "https://chiconginverter.com",
+  "https://giao-dien-website-ban-khoa-hoc-vide.vercel.app"
+];
 
 app.use(
   cors({
