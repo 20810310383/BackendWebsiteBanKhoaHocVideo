@@ -274,3 +274,32 @@ exports.getAllWalletHistoryAdmin = async (req, res) => {
     res.status(500).json({ message: "Lỗi server khi lấy lịch sử ví." });
   }
 };
+
+// Xóa một lịch sử giao dịch theo ID
+exports.deleteTransaction = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Tìm và xóa giao dịch
+    const transaction = await WalletTransaction.findByIdAndDelete(id);
+
+    if (!transaction) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy lịch sử giao dịch này.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Đã xóa lịch sử giao dịch thành công.",
+      data: transaction,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Lỗi hệ thống khi xóa giao dịch.",
+      error: error.message,
+    });
+  }
+};
