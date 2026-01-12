@@ -22,6 +22,9 @@ exports.napTienQuaSePay = async (req, res) => {
 
     // 1️⃣ BẢO MẬT: Kiểm tra API Key
     const authorizationAPI = req.headers.authorization;
+    console.log("log authorizationAPI: ",authorizationAPI);
+    console.log("log process.env.SEPAY_API_KEY: ",process.env.SEPAY_API_KEY);
+    
     if (authorizationAPI !== process.env.SEPAY_API_KEY) {
       console.error("❌ Sai API Key");
       return res.status(401).json({ message: "Unauthorized" });
