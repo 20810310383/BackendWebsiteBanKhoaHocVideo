@@ -18,7 +18,7 @@ const encryptPayload = (data) => {
 
 exports.napTienQuaSePay = async (req, res) => {
   try {
-    console.log("🔍 Webhook nạp tiền SePay:", req.body.content);
+    console.log("🔍 Webhook nạp tiền SePay:", req.body.code);
 
     // 1️⃣ BẢO MẬT: Kiểm tra API Key
     const authorizationAPI = req.headers.authorization;
@@ -29,7 +29,7 @@ exports.napTienQuaSePay = async (req, res) => {
 
     // 3️⃣ TRÍCH XUẤT MÃ NGƯỜI DÙNG
     // Giả sử nội dung là "DH ABCDEF" hoặc "DHABCDEF"
-    const content = req.body.content || "";
+    const content = req.body.code || "";
     const maUser = content.replace(/DH\s*/gi, "").trim().toUpperCase();
     console.log("👤 Đang xử lý nạp tiền cho User Code:", maUser);
 
